@@ -9,7 +9,12 @@ const AppError = require("./utils/appError");
 
 const app = express();
 
-app.use(cors({ origin: "*" }));
+const corsOpts = {
+  origin: '*',
+  methods: '*',
+};
+
+app.use(cors(corsOpts));
 
 app.use(express.json());
 app.use("/api/v1/users/", userRouter);

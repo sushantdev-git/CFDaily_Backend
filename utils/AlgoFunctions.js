@@ -56,7 +56,7 @@ const checkIfSolved = (currentDate, dailySubmission) => {
 };
 
 module.exports = {
-  calStreak,
+  calculateStreak,
   checkIfSolved,
   getSubmittedDailyInRange
 }
