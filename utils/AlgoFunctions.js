@@ -55,8 +55,71 @@ const checkIfSolved = (currentDate, dailySubmission) => {
   return false;
 };
 
+const getQuestionSolvedTime = (question) => {
+  return question.creationTimeSeconds * 1000
+}
+
+const findBounds = async (submissions, dcDate) => {
+  
+  submissions.sort((a,b) => {
+    return a.creationTimeSeconds - b.creationTimeSeconds;
+  });
+
+  const date = new Date(Date.parse(dcDate));
+
+  const lb = date, ub = new Date(date.getTime() + 24*60*60*1000 - 1);
+
+  const n = submissions.length-1;
+
+  let startInd = bsearh(n, (l, r, mid) => {
+    const solvedTime = getQuestionSolvedTime(submissions[mid]);
+    if (solvedTime < lb) return [mid + 1, r];
+    return [l, mid];
+  });
+
+  let endInd = bsearh(n+1, (l, r, mid) => {
+    const solvedTime = getQuestionSolvedTime(submissions[mid]);
+    if (solvedTime <= ub) return [mid + 1, r];
+    return [l, mid];
+  });
+
+  return [startInd, endInd];
+};
+
+const isSubmitted = async (submissions, date, questionName) => {
+  
+  const [lb, ub] = await findBounds(submissions, date);
+
+  for (let i = lb; i < ub; i++) {
+    if (
+      submissions[i].problem.name === questionName &&
+      submissions[i].verdict === "OK"
+    ) {
+      return submissions[i];
+    }
+  }
+  return false;
+};
+
+const getRank = (rankChanges, date) => {
+  let begin = 0,
+    end = rankChanges.length - 1;
+  let res = -1;
+  while (begin <= end) {
+    let mid = begin + (end - begin) / 2;
+    if (rankChanges[mid].date <= date) {
+      res = mid;
+      begin = mid + 1;
+    } else end = mid - 1;
+  }
+  return rankChanges[res == -1 ? 0 : res].rank;
+};
+
+
 module.exports = {
   calculateStreak,
   checkIfSolved,
-  getSubmittedDailyInRange
+  getSubmittedDailyInRange,
+  isSubmitted,
+  getRank
 }

@@ -5,84 +5,7 @@ const DailyProblem = require("../models/dailyProblemModel");
 
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
-const {calculateStreak, checkIfSolved, getSubmittedDailyInRange} = require("../utils/AlgoFunctions");
-
-const compare = (question, submission) => {
-  if (question > submission) return 1;
-  else if (submission - question <= 24 * 60 * 60 * 1000) return 0;
-  else return -1;
-};
-
-const lowerBound = (submissions, question) => {
-  let begin = 0,
-    end = submissions.length - 1;
-  let ans = -1;
-  while (begin <= end) {
-    let mid = begin + Math.floor((end - begin) / 2);
-    let comp = compare(
-      question,
-      new Date(submissions[mid].creationTimeSeconds * 1000)
-    );
-
-    if (comp == 0) {
-      ans = mid;
-      begin = mid + 1;
-    } else if (comp == 1) end = mid - 1;
-    else begin = mid + 1;
-  }
-  return ans;
-};
-
-const upperBound = (submissions, question) => {
-  let begin = 0,
-    end = submissions.length - 1;
-  let ans = -1;
-  while (begin <= end) {
-    let mid = begin + Math.floor((end - begin) / 2);
-    let comp = compare(
-      question,
-      new Date(submissions[mid].creationTimeSeconds * 1000)
-    );
-
-    if (comp == 0) {
-      ans = mid;
-      end = mid - 1;
-    } else if (comp == 1) end = mid - 1;
-    else begin = mid + 1;
-  }
-  return ans;
-};
-
-const isSubmitted = (submissions, date, questionName) => {
-  const lb = lowerBound(submissions, date);
-  const ub = upperBound(submissions, date);
-
-  console.log(submissions);
-
-  for (let i = ub; i <= lb; i++) {
-    if (
-      submissions[i] && submissions[i].problem.name === questionName &&
-      submissions[i].verdict === "OK"
-    ) {
-      return submissions[i];
-    }
-  }
-  return false;
-};
-
-const getRank = (rankChanges, date) => {
-  let begin = 0,
-    end = rankChanges.length - 1;
-  let res = -1;
-  while (begin <= end) {
-    let mid = begin + (end - begin) / 2;
-    if (rankChanges[mid].date <= date) {
-      res = mid;
-      begin = mid + 1;
-    } else end = mid - 1;
-  }
-  return rankChanges[res == -1 ? 0 : res].rank;
-};
+const {calculateStreak, checkIfSolved, getSubmittedDailyInRange, isSubmitted, getRank} = require("../utils/AlgoFunctions");
 
 const getProblem = (dailyProblemSet, rank) => {
   if (rank === "newbie") return dailyProblemSet.newbie;
@@ -105,9 +28,6 @@ exports.validate = catchAsync(async (req, res, next) => {
   if (!date) throw new AppError(400, "Please provide all the required details");
 
   date = new Date(date);
-  // console.log(date)
-  // date = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
   console.log(date)
 
   const user = req.user;
@@ -126,12 +46,10 @@ exports.validate = catchAsync(async (req, res, next) => {
     $and: [{ date: { $gte: start } }, { date: { $lte: end } }],
   });
 
-  console.log(dailyProblems)
-
   const rank = getRank(handle.rankChanges, date);
   const problem = getProblem(dailyProblems, rank);
 
-  const submission = isSubmitted(submissions, date, problem.name);
+  const submission = await isSubmitted(submissions, date, problem.name);
 
   if (submission) {
     handle.daily.push(date);
@@ -141,12 +59,13 @@ exports.validate = catchAsync(async (req, res, next) => {
     handle.maxStreak = maxStreak;
     await handle.save();
     
-    res.status(200).json({
+    return res.status(200).json({
       status: "success",
       submission: submission,
     });
 
-  } else res.status(200).json({ status: "fail", comment: "Not submitted" });
+  } 
+  res.status(400).json({ status: "fail", comment: "Not submitted" });
 });
 
 
