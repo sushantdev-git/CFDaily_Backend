@@ -53,13 +53,15 @@ const upperBound = (submissions, question) => {
   return ans;
 };
 
-const isSubmitted = (submissions, date, question) => {
+const isSubmitted = (submissions, date, questionName) => {
   const lb = lowerBound(submissions, date);
   const ub = upperBound(submissions, date);
 
-  for (i = ub; i <= lb; i++) {
+  console.log(submissions);
+
+  for (let i = ub; i <= lb; i++) {
     if (
-      submissions[i].problem.name === question &&
+      submissions[i] && submissions[i].problem.name === questionName &&
       submissions[i].verdict === "OK"
     ) {
       return submissions[i];
@@ -103,7 +105,10 @@ exports.validate = catchAsync(async (req, res, next) => {
   if (!date) throw new AppError(400, "Please provide all the required details");
 
   date = new Date(date);
-  date = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  // console.log(date)
+  // date = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  console.log(date)
 
   const user = req.user;
   const handle = await Handle.findById(user.handle);
@@ -120,6 +125,8 @@ exports.validate = catchAsync(async (req, res, next) => {
   const dailyProblems = await DailyProblem.findOne({
     $and: [{ date: { $gte: start } }, { date: { $lte: end } }],
   });
+
+  console.log(dailyProblems)
 
   const rank = getRank(handle.rankChanges, date);
   const problem = getProblem(dailyProblems, rank);
