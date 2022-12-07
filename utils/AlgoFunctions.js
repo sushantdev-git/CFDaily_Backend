@@ -42,7 +42,7 @@ const getSubmittedDailyInRange = (lb, ub, dailySubmission) => {
     return [l, mid];
   });
 
-  return dailySubmission.slice(startInd, endInd);
+  return dailySubmission.slice(startInd, endInd-startInd+1);
 };
 
 const checkIfSolved = (currentDate, dailySubmission) => {
@@ -61,6 +61,7 @@ const getQuestionSolvedTime = (question) => {
 
 const findBounds = async (submissions, dcDate) => {
   
+  //submisstion is not in sorted order so first we have to sort it
   submissions.sort((a,b) => {
     return a.creationTimeSeconds - b.creationTimeSeconds;
   });
@@ -68,6 +69,7 @@ const findBounds = async (submissions, dcDate) => {
   const date = new Date(Date.parse(dcDate));
 
   const lb = date, ub = new Date(date.getTime() + 24*60*60*1000 - 1);
+  //then we are creating upper bound and lower bound for day, on which question have to be solved.
 
   const n = submissions.length-1;
 
@@ -83,13 +85,16 @@ const findBounds = async (submissions, dcDate) => {
     return [l, mid];
   });
 
+  //after doing binary search we have indexes for problems solved on this particular day
   return [startInd, endInd];
 };
 
 const isSubmitted = async (submissions, date, questionName) => {
   
   const [lb, ub] = await findBounds(submissions, date);
+  //finding upper bound and lower bound for submission on this particular date
 
+  //then checking if user have solved this problem on this particular date.
   for (let i = lb; i < ub; i++) {
     if (
       submissions[i].problem.name === questionName &&
