@@ -56,9 +56,9 @@ exports.signup = catchAsync(async (req, res, next) => {
   if (!newHandle) {
     newHandle = await Handle.create({
       handle: responseJSON.result[0].handle,
-      rank: responseJSON.result[0].rank,
-      rating: responseJSON.result[0].rating,
-      maxRating: responseJSON.result[0].maxRating,
+      rank: responseJSON.result[0].rank ?? 'newbie',
+      rating: responseJSON.result[0].rating ?? 0,
+      maxRating: responseJSON.result[0].maxRating ?? 0,
     });
   }
 

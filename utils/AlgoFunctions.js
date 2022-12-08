@@ -37,7 +37,7 @@ const getSubmittedDailyInRange = (lb, ub, dailySubmission) => {
     return [l, mid];
   });
 
-  let endInd = bsearh(n, (l, r, mid) => {
+  let endInd = bsearh(n+1, (l, r, mid) => {
     if (dailySubmission[mid] <= ub) return [mid + 1, r];
     return [l, mid];
   });

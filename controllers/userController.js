@@ -45,10 +45,9 @@ exports.addHandle = catchAsyc(async (req, res, next) => {
   const user = req.user;
   const handle = req.body.handle;
   if (!handle) throw new AppError(404, "Please provide a codeforces handle");
-  console.log(handle);
 
   let newHandle = await Handle.findOne({ handleLower: handle.toLowerCase() });
-  console.log(newHandle);
+ 
   if (!newHandle) {
     const response = await fetch(
       `https://codeforces.com/api/user.info?handles=${handle}`
