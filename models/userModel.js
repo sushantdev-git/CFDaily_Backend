@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema({
   passwordResetExpires: Date,
 
   refreshToken: String,
+  accessToken: String,
   refreshTokenCreatedAt: Date,
 });
 

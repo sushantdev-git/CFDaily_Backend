@@ -19,6 +19,8 @@ const createAndSendToken = async (user, res) => {
 
   user.refreshToken = refreshToken;
   user.refreshTokenCreatedAt = Date.now();
+  user.accessToken = token;
+
   await user.save({ validateBeforeSave: false });
 
   res.status(200).json({
@@ -82,7 +84,11 @@ exports.login = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({ email: email }).select("+password");
 
-  if (!user || !(await user.correctPassword(password, user.password)))
+  if(!user){
+    throw new AppError(401, "Account doesn't exist");
+  }
+
+  if (!(await user.correctPassword(password, user.password)))
     throw new AppError(401, "Incorrect email or password");
 
   if (!user.verified) {
@@ -155,7 +161,7 @@ exports.verifyToken = catchAsync(async (req, res, next) => {
   const decoded = await jwt.verify(token, process.env.JWT_SECRET);
 
   const user = await User.findById(decoded.id);
-  if (!user)
+  if (!user || user.accessToken !== token)
     throw new AppError(401, "The user beloging to this token no longer exists");
 
   if (user.changedPasswordAfter(decoded.iat))
@@ -169,8 +175,6 @@ exports.verifyToken = catchAsync(async (req, res, next) => {
 });
 
 exports.refreshToken = catchAsync(async (req, res, next) => {
-  const email = req.body.email;
-  if (!email) throw new AppError(400, "Please send all the required details");
 
   const refreshToken = req.body.refreshToken;
   if (!refreshToken)
@@ -179,10 +183,10 @@ exports.refreshToken = catchAsync(async (req, res, next) => {
       "You are not logged in! Please log in to get access"
     );
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({refreshToken: refreshToken});
 
   if (!user)
-    throw new AppError(401, "The user belogin to this email does not exist");
+    throw new AppError(401,  "You are not logged in! Please log in to get access");
 
   if (
     user.refreshToken != refreshToken ||
