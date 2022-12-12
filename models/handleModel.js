@@ -26,7 +26,9 @@ const handleSchema = new mongoose.Schema({
 //Stores the changes to user rank in rankChanges when the rank is updated
 handleSchema.pre("save", function (next) {
   if (!this.isModified("rank")) return next();
-  this.rankChanges.push({ date: new Date(), rank: this.rank });
+  let d = new Date();
+  d = new Date(d.getYear(), d.getMonth(), d.getDate());
+  this.rankChanges.push({ date: d, rank: this.rank });
   next();
 });
 

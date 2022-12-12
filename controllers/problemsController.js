@@ -28,7 +28,6 @@ exports.validate = catchAsync(async (req, res, next) => {
   if (!date) throw new AppError(400, "Please provide all the required details");
 
   date = new Date(date);
-  console.log(date)
 
   const user = req.user;
   const handle = await Handle.findById(user.handle);

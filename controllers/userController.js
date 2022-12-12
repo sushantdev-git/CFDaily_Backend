@@ -25,6 +25,8 @@ exports.refresh = catchAsyc(async (req, res, next) => {
 
   const responseJSON = await response.json();
 
+  console.log(responseJSON);
+
   if (responseJSON.status === "FAILED")
     throw new AppError(400, responseJSON.comment);
 

@@ -111,7 +111,7 @@ const getRank = (rankChanges, date) => {
     end = rankChanges.length - 1;
   let res = -1;
   while (begin <= end) {
-    let mid = begin + (end - begin) / 2;
+    let mid = Math.floor(begin + (end - begin) / 2);
     if (rankChanges[mid].date <= date) {
       res = mid;
       begin = mid + 1;
