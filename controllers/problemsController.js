@@ -95,6 +95,7 @@ exports.monthlyQuestions = catchAsync(async (req, res, next) => {
       ...prob,
       solved: checkIfSolved(element.date, submittedDaily), //marking if user have solved this problem or not.
       date: element.date,
+      rank : rank,
     });
   }
 
