@@ -10,8 +10,8 @@ const AppError = require("./utils/appError");
 const app = express();
 
 const corsOpts = {
-  origin: 'https://cf-daily.vercel.app',
-  // origin:"*",
+  // origin: 'https://cf-daily.vercel.app',
+  origin:"*",
   methods: '*',
 };
 

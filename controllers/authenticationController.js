@@ -128,7 +128,7 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
   if (!email || !otp)
     throw new AppError(400, "Please send all the required details");
 
-  const user = await User.findOne({ email: email });
+  let user = await User.findOne({ email: email });
   if (!user) throw new AppError("Incorrect email");
 
   if (user.verificationOtp != otp) throw new AppError(400, "Invalid OTP");

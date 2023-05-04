@@ -1,9 +1,16 @@
 const mongoose = require("mongoose")
 const fetch = require("node-fetch")
+const dotenv = require("dotenv");
+dotenv.config({ path: "./config.env" });
 
 const Problems = require("../models/problemModel");
 
-mongoose.connect('mongodb+srv://rachitsindhu242:opgdOAfzad2C12Wf@cluster0.no8slgz.mongodb.net/?retryWrites=true&w=majority').then( async () => {
+const DB = process.env.DATABASE.replace(
+    "<password>",
+    process.env.DATABASE_PASSWORD
+  );
+
+mongoose.connect(DB).then( async () => {
     console.log("Database successfully connected");
     const response = await fetch('https://codeforces.com/api/problemset.problems');
     const responseJSON = await response.json();
